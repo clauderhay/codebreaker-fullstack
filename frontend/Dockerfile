@@ -7,10 +7,6 @@ WORKDIR /app
 # Set environment variables
 ENV NODE_ENV=development
 
-# Install dependencies for Expo
-RUN apk add --no-cache \
-    git
-
 # Copy package files
 COPY package*.json ./
 

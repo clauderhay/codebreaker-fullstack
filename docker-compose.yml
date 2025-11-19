@@ -15,12 +15,6 @@ services:
       - ./backend:/app
       - /app/venv  # Prevent overwriting container's venv
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
     networks:
       - codebreaker-network
 
@@ -42,8 +36,7 @@ services:
       - ./frontend:/app
       - /app/node_modules  # Prevent overwriting container's node_modules
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     restart: unless-stopped
     networks:
       - codebreaker-network
