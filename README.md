@@ -270,8 +270,6 @@ curl -X POST http://localhost:8000/api/games
 
 ## Future Improvements
 
-See `IMPROVEMENTS.md` for detailed enhancement proposals.
-
 ### High Priority
 
 - [x] Join game by code in frontend UI **IMPLEMENTED**
