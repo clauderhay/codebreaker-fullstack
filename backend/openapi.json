@@ -1,0 +1,488 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Code Breaker API",
+        "description": "Backend API for the Code Breaker multiplayer game",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Read Root",
+                "description": "Health check endpoint.",
+                "operationId": "read_root__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/games": {
+            "post": {
+                "summary": "Create Game",
+                "description": "Create a new game.\nReturns a unique game code that players can use to join.",
+                "operationId": "create_game_api_games_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreateGameResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/games/{game_code}": {
+            "get": {
+                "summary": "Get Game",
+                "description": "Get the current state of a game.\nNote: The secret code is never exposed to clients.",
+                "operationId": "get_game_api_games__game_code__get",
+                "parameters": [
+                    {
+                        "name": "game_code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Game Code"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GameResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete Game",
+                "description": "Delete a game (cleanup).",
+                "operationId": "delete_game_api_games__game_code__delete",
+                "parameters": [
+                    {
+                        "name": "game_code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Game Code"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/games/{game_code}/set-secret": {
+            "post": {
+                "summary": "Set Secret Code",
+                "description": "Player 1 sets the secret code.\nValidates the code and transitions game to TRANSITION phase.",
+                "operationId": "set_secret_code_api_games__game_code__set_secret_post",
+                "parameters": [
+                    {
+                        "name": "game_code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Game Code"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetSecretCodeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/games/{game_code}/start-guessing": {
+            "post": {
+                "summary": "Start Guessing",
+                "description": "Transition from TRANSITION phase to GUESSING phase.\nCalled when Player 2 is ready to start guessing.",
+                "operationId": "start_guessing_api_games__game_code__start_guessing_post",
+                "parameters": [
+                    {
+                        "name": "game_code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Game Code"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/games/{game_code}/guess": {
+            "post": {
+                "summary": "Submit Guess",
+                "description": "Submit a guess and get feedback.\nReturns wellPlaced (correct position) and misplaced (wrong position) counts.",
+                "operationId": "submit_guess_api_games__game_code__guess_post",
+                "parameters": [
+                    {
+                        "name": "game_code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Game Code"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubmitGuessRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/games/{game_code}/reset": {
+            "post": {
+                "summary": "Reset Game",
+                "description": "Reset the game for play again.",
+                "operationId": "reset_game_api_games__game_code__reset_post",
+                "parameters": [
+                    {
+                        "name": "game_code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Game Code"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CreateGameResponse": {
+                "properties": {
+                    "gameCode": {
+                        "type": "string",
+                        "title": "Gamecode"
+                    },
+                    "message": {
+                        "type": "string",
+                        "title": "Message"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "gameCode",
+                    "message"
+                ],
+                "title": "CreateGameResponse"
+            },
+            "GameResponse": {
+                "properties": {
+                    "gameCode": {
+                        "type": "string",
+                        "title": "Gamecode"
+                    },
+                    "gamePhase": {
+                        "type": "string",
+                        "enum": [
+                            "SETUP",
+                            "TRANSITION",
+                            "GUESSING",
+                            "GAME_OVER"
+                        ],
+                        "title": "Gamephase"
+                    },
+                    "guesses": {
+                        "items": {
+                            "$ref": "#/components/schemas/Guess"
+                        },
+                        "type": "array",
+                        "title": "Guesses"
+                    },
+                    "maxAttempts": {
+                        "type": "integer",
+                        "title": "Maxattempts"
+                    },
+                    "isVictory": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Isvictory"
+                    },
+                    "currentPlayer": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Currentplayer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "gameCode",
+                    "gamePhase",
+                    "guesses",
+                    "maxAttempts"
+                ],
+                "title": "GameResponse"
+            },
+            "Guess": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "guess": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Guess"
+                    },
+                    "wellPlaced": {
+                        "type": "integer",
+                        "title": "Wellplaced"
+                    },
+                    "misplaced": {
+                        "type": "integer",
+                        "title": "Misplaced"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "guess",
+                    "wellPlaced",
+                    "misplaced"
+                ],
+                "title": "Guess"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "SetSecretCodeRequest": {
+                "properties": {
+                    "secretCode": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "maxItems": 4,
+                        "minItems": 4,
+                        "title": "Secretcode"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "secretCode"
+                ],
+                "title": "SetSecretCodeRequest"
+            },
+            "SubmitGuessRequest": {
+                "properties": {
+                    "guess": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "maxItems": 4,
+                        "minItems": 4,
+                        "title": "Guess"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "guess"
+                ],
+                "title": "SubmitGuessRequest"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}
