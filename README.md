@@ -334,8 +334,3 @@ This project is for technical assessment purposes.
 ## Author
 
 Developed as a technical assessment for demonstrating full-stack development capabilities.
-
----
-
-**Time Investment**: ~4 hours
-**Key Achievement**: Transformed local prototype into networked multiplayer game with clean architecture
